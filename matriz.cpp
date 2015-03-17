@@ -10,7 +10,7 @@ class Matrix{
     public: Matrix(int rows,int cols):rows(rows),cols(cols){
         try{
             matrix =new float*[rows];
-            for(int i=0;i<3;i++){
+            for(int i=0;i<rows;i++){
                 matrix[i]=new float[cols];
             }
         }
@@ -18,24 +18,40 @@ class Matrix{
             cerr<<e.what()<<endl;
         }
     }
-    public: Matrix(float **matrix){
+    public: Matrix(int r, int c,float **matrix){
         this->matrix=matrix;
+        this->rows=r;
+        this->cols=c;
+
     }
-    public: int numbRows(){
+    public: int getRows(){
         return this->rows;
     }
-    public: int numbCols(){
+    public: int getCols(){
         return this->cols;
     }
     public: float** getMatrix(){
             return this->matrix;
     }
     public: void setMatrix(){
-        for(int i=0;i<this->rows;i++){
-            for(int j=0;j<this->cols;j++){
-                cout<<"Set elem: A["<<i+1<<"]["<<j+1<<"]"<<endl;
-                cin>>matrix[i][j];
+        try{
+            for(int i=0;i<this->rows;i++){
+                for(int j=0;j<this->cols;j++){
+                    cout<<"Set elem: A["<<i+1<<"]["<<j+1<<"]"<<endl;
+                    cin>>matrix[i][j];
+                }
             }
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+    }
+    public: void setMatrix(int r, int c,float value){
+        try{
+            matrix[r][c]=value;
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
         }
     }
     public: float det(){
@@ -45,7 +61,7 @@ class Matrix{
             float a;
             if(rows==cols){
                 float **mat=new float *[rows];
-                for(int i=0;i<3;i++){
+                for(int i=0;i<rows;i++){
                     mat[i]=new float[cols];
                 }
                 for(int i=0;i<rows;i++){
@@ -71,7 +87,47 @@ class Matrix{
                     }I++;
                 }
             }
+            if(!det){
+                return abs(det);
+            }
             return det;
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+    }
+    public: Matrix operator *(Matrix& that){
+        try{
+                int c;
+                Matrix result=Matrix(rows,that.getCols());
+                if(cols==that.getRows()){
+                    for(int i=0;i<rows;i++){
+                        for(int k=0;k<that.getCols();k++){
+                            c=0;
+                            for(int j=0;j<that.getCols();j++){
+                                c+=matrix[i][j]*that.getMatrix()[j][k];
+                            }
+                            result.setMatrix(i,k,c);
+                        }
+                    }
+                }
+                return result;
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+    }
+    public: Matrix operator ,(Matrix& that){
+        try{
+            if(this->rows==that.getRows()&&this->cols==that.getCols()){
+                Matrix result=Matrix(rows,cols);
+                for(int i=0;i<rows;i++){
+                    for(int j=0;j<cols;j++){
+                        result.setMatrix(i,j,this->matrix[i][j]*that.getMatrix()[i][j]);
+                    }
+                }
+                return result;
+            }
         }
         catch(exception e){
             cerr<<e.what()<<endl;
@@ -117,14 +173,16 @@ int main ()
         }
         k+=2;
     }
-    Matrix matrixx=Matrix(matrix);
-    Matrix matriz=Matrix(3,3);
-    matriz.setMatrix(matrix);
-    matriz.setMatrix();
-    cout<<"det="<<matriz.det()<<endl;
-    for(int i=0;i<3;i++){
-        for(int j=0;j<3;j++){
-            cout<<matriz.getMatrix()[i][j]<<" ";
+    Matrix A=Matrix(3,3,matrix);
+    Matrix B=Matrix(3,3);
+    B.setMatrix();
+    float f=matrix[1][1];
+    cout<<f<<endl;
+    cout<<"det="<<A.det()<<endl;
+    Matrix C = B*A;
+    for(int i=0;i<C.getRows();i++){
+        for(int j=0;j<C.getCols();j++){
+            cout<<C.getMatrix()[i][j]<<" ";
         }
         cout<<endl;
     }
