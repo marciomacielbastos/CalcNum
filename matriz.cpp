@@ -2,12 +2,21 @@
 #include <cmath>
 using namespace std;
 
+class myexception: public exception
+{
+  virtual const char* what() const throw()
+  {
+    return "A exception happened";
+  }
+} myex;
+
 class Matrix{
     private: int rows;
     private: int cols;
     private: float** matrix;
-    public: Matrix():matrix(NULL),rows(0),cols(0){}
-    public: Matrix(int rows,int cols):rows(rows),cols(cols){
+    private: float D;
+    public: Matrix():matrix(NULL),rows(0),cols(0),D(0){}
+    public: Matrix(int rows,int cols):rows(rows),cols(cols),D(0){
         try{
             matrix =new float*[rows];
             for(int i=0;i<rows;i++){
@@ -18,17 +27,26 @@ class Matrix{
             cerr<<e.what()<<endl;
         }
     }
-    public: Matrix(int r, int c,float **matrix){
-        this->matrix=matrix;
-        this->rows=r;
-        this->cols=c;
-
+    public: Matrix(int r, int c,float **matrix):rows(r),cols(c),matrix(matrix){
+        this->D=Det();
     }
     public: int getRows(){
         return this->rows;
     }
     public: int getCols(){
         return this->cols;
+    }
+    public: float det(){
+        try{
+            if(rows!=cols){
+             throw myex;
+            }
+            else
+                return D;
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
     }
     public: float** getMatrix(){
             return this->matrix;
@@ -41,6 +59,7 @@ class Matrix{
                     cin>>matrix[i][j];
                 }
             }
+            this->D=Det();
         }
         catch(exception e){
             cerr<<e.what()<<endl;
@@ -49,12 +68,13 @@ class Matrix{
     public: void setMatrix(int r, int c,float value){
         try{
             matrix[r][c]=value;
+            this->D=Det();
         }
         catch(exception e){
             cerr<<e.what()<<endl;
         }
     }
-    public: float det(){
+    private: float Det(){
         try{
             float det=1,p;
             int I=0;
@@ -86,11 +106,12 @@ class Matrix{
 
                     }I++;
                 }
+                if(det==0||abs(det)<(1/float(100000))){
+                return 0;
             }
-            if(!det){
-                return abs(det);
+            else
+                return det;
             }
-            return det;
         }
         catch(exception e){
             cerr<<e.what()<<endl;
@@ -98,17 +119,19 @@ class Matrix{
     }
     public: Matrix operator *(Matrix& that){
         try{
+
+                if(cols!=that.getRows()){
+                    throw myex;
+                }
                 int c;
                 Matrix result=Matrix(rows,that.getCols());
-                if(cols==that.getRows()){
-                    for(int i=0;i<rows;i++){
-                        for(int k=0;k<that.getCols();k++){
-                            c=0;
-                            for(int j=0;j<that.getCols();j++){
-                                c+=matrix[i][j]*that.getMatrix()[j][k];
-                            }
-                            result.setMatrix(i,k,c);
+                for(int i=0;i<rows;i++){
+                    for(int k=0;k<that.getCols();k++){
+                        c=0;
+                        for(int j=0;j<that.getCols();j++){
+                            c+=matrix[i][j]*that.getMatrix()[j][k];
                         }
+                        result.setMatrix(i,k,c);
                     }
                 }
                 return result;
@@ -119,15 +142,16 @@ class Matrix{
     }
     public: Matrix operator ,(Matrix& that){
         try{
-            if(this->rows==that.getRows()&&this->cols==that.getCols()){
-                Matrix result=Matrix(rows,cols);
-                for(int i=0;i<rows;i++){
-                    for(int j=0;j<cols;j++){
-                        result.setMatrix(i,j,this->matrix[i][j]*that.getMatrix()[i][j]);
-                    }
-                }
-                return result;
+            if(this->rows!=that.getRows()&&this->cols!=that.getCols()){
+                throw myex;
             }
+            Matrix result=Matrix(rows,cols);
+            for(int i=0;i<rows;i++){
+                for(int j=0;j<cols;j++){
+                    result.setMatrix(i,j,this->matrix[i][j]*that.getMatrix()[i][j]);
+                }
+            }
+            return result;
         }
         catch(exception e){
             cerr<<e.what()<<endl;
@@ -157,6 +181,22 @@ class Matrix{
     public: void setMatrix(float **matrix){
         this->matrix=matrix;
     }
+    public: Matrix inv(){
+        try{
+                if(rows!=cols||D==0){
+                    throw myex;
+                }
+                Matrix inv=Matrix(rows,cols);
+                for(int i=0;i<rows;i++){
+                        inv.setMatrix(i,i,1);
+                }
+
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+    }
+
 };
 
 int main ()
@@ -176,10 +216,8 @@ int main ()
     Matrix A=Matrix(3,3,matrix);
     Matrix B=Matrix(3,3);
     B.setMatrix();
-    float f=matrix[1][1];
-    cout<<f<<endl;
-    cout<<"det="<<A.det()<<endl;
-    Matrix C = B*A;
+    cout<<"det="<<B.det()<<endl;
+    Matrix C = B;
     for(int i=0;i<C.getRows();i++){
         for(int j=0;j<C.getCols();j++){
             cout<<C.getMatrix()[i][j]<<" ";
