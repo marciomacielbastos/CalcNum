@@ -106,7 +106,7 @@ class Matrix{
 
                     }I++;
                 }
-                if(det==0||abs(det)<(1/float(100000))){
+                if(abs(det)<(1/float(100000))){
                 return 0;
             }
             else
@@ -181,16 +181,70 @@ class Matrix{
     public: void setMatrix(float **matrix){
         this->matrix=matrix;
     }
+    private: void pivot(int i, Matrix *inv,Matrix *mat){
+        try{
+
+            float c=mat->getMatrix()[i][i];
+            float aux;
+            int l=i;
+            for(int k=i+1;k<rows;k++){
+                if(abs(c)<abs(mat->getMatrix()[k][i])){
+                    c=mat->getMatrix()[k][i];
+                    l=k;
+                }
+            }
+            if(l!=i){
+                for(int j=0;j<rows;j++){
+                    aux=mat->getMatrix()[i][j];
+                    mat->setMatrix(i,j,mat->getMatrix()[l][j]);
+                    mat->setMatrix(l,j,aux);
+                    aux=inv->getMatrix()[i][j];
+                    inv->setMatrix(i,j,inv->getMatrix()[l][j]);
+                    inv->setMatrix(l,j,aux);
+                }
+            }
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+    }
     public: Matrix inv(){
         try{
-                if(rows!=cols||D==0){
+                if(rows!=cols||this->D==0){
                     throw myex;
                 }
+                float p;
                 Matrix inv=Matrix(rows,cols);
                 for(int i=0;i<rows;i++){
-                        inv.setMatrix(i,i,1);
+                    inv.setMatrix(i,i,1);
+                }
+                Matrix mat=Matrix(rows,cols);
+                for(int i=0;i<rows;i++){
+                    for(int j=0;j<cols;j++){
+                        mat.setMatrix(i,j,this->getMatrix()[i][j]);
+                    }
+                }
+                for(int i=0;i<rows;i++){
+                    pivot(i,&inv,&mat);
+                    p=mat.getMatrix()[i][i];
+                    if(p){
+                        for(int j=0;j<rows;j++){
+                            mat.setMatrix(i,j,(mat.getMatrix()[i][j]/(float)p));
+                            inv.setMatrix(i,j,(inv.getMatrix()[i][j]/(float)p));
+                        }
+                        for(int k=0;k<rows;k++){
+                            if(k!=i){
+                                p=mat.getMatrix()[k][i];
+                                for(int j=0;j<rows;j++){
+                                    mat.setMatrix(k,j,(mat.getMatrix()[k][j]-p*mat.getMatrix()[i][j]));
+                                    inv.setMatrix(k,j,(inv.getMatrix()[k][j]-p*inv.getMatrix()[i][j]));
+                                }
+                            }
+                        }
+                    }
                 }
 
+                return inv;
         }
         catch(exception e){
             cerr<<e.what()<<endl;
@@ -213,14 +267,15 @@ int main ()
         }
         k+=2;
     }
-    Matrix A=Matrix(3,3,matrix);
+    //Matrix A=Matrix(3,3,matrix);
     Matrix B=Matrix(3,3);
     B.setMatrix();
     cout<<"det="<<B.det()<<endl;
-    Matrix C = B;
-    for(int i=0;i<C.getRows();i++){
-        for(int j=0;j<C.getCols();j++){
-            cout<<C.getMatrix()[i][j]<<" ";
+    Matrix C = Matrix(3,3,B.inv().getMatrix());
+    Matrix D = Matrix(3,3,(C*B).getMatrix());
+    for(int i=0;i<D.getRows();i++){
+        for(int j=0;j<D.getCols();j++){
+            cout<<D.getMatrix()[i][j]<<" ";
         }
         cout<<endl;
     }
