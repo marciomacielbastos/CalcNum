@@ -160,7 +160,7 @@ class Matrix{
     }
     public: Matrix operator ,(Matrix& that){
         try{
-            if(this->rows!=that.getRows()&&this->cols!=that.getCols()){
+            if(this->rows!=that.getRows()||this->cols!=that.getCols()){
                 throw myex;
             }
             Matrix result=Matrix(rows,cols);
@@ -170,6 +170,60 @@ class Matrix{
                 }
             }
             return result;
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+    }
+
+    public: Matrix operator +(Matrix& that){
+        try{
+                if(this->rows!=that.getRows()||this->cols!=that.getCols()){
+                    throw myex;
+                }
+                Matrix result=Matrix(rows,cols);
+                for(int i=0;i<rows;i++){
+                    for(int j=0;j<cols;j++){
+                        result.setMatrix(i,j,this->matrix[i][j]+that.getMatrix()[i][j]);
+                    }
+                }
+                return result;
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+    }
+
+    public: Matrix operator -(Matrix& that){
+        try{
+                if(this->rows!=that.getRows()||this->cols!=that.getCols()){
+                    throw myex;
+                }
+                Matrix result=Matrix(rows,cols);
+                for(int i=0;i<rows;i++){
+                    for(int j=0;j<cols;j++){
+                        result.setMatrix(i,j,this->matrix[i][j]-that.getMatrix()[i][j]);
+                    }
+                }
+
+                return result;
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+    }
+    public: void operator=(Matrix that){
+        try{
+                Matrix temp=Matrix(that.rows,that.cols);
+                for(int i=0;i<temp.getRows();i++){
+                    for(int j=0;j<temp.getCols();j++){
+                            temp.setMatrix(i,j,that.getMatrix()[i][j]);
+                    }
+
+                }
+                this->matrix=temp.getMatrix();
+                this->rows=temp.getRows();
+                this->cols=temp.getCols();
         }
         catch(exception e){
             cerr<<e.what()<<endl;
@@ -287,14 +341,17 @@ int main ()
     }
     //Matrix A=Matrix(3,3,matrix);
     Matrix B=Matrix(3,3);
+    Matrix E=Matrix(3,3,matrix);
     B.setMatrix();
 
     cout<<"det="<<B.det()<<endl;
     Matrix C = Matrix(3,3,B.inv().getMatrix());
     Matrix D = Matrix(3,3,(C*B).getMatrix());
-    for(int i=0;i<D.getRows();i++){
-        for(int j=0;j<D.getCols();j++){
-            cout<<D.getMatrix()[i][j]<<" ";
+    C=D;
+    C=C*B;
+    for(int i=0;i<C.getRows();i++){
+        for(int j=0;j<C.getCols();j++){
+            cout<<C.getMatrix()[i][j]<<" ";
         }
         cout<<endl;
     }
