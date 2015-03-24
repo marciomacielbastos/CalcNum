@@ -2,7 +2,6 @@
 #include <iostream>
 #include <cmath>
 using namespace std;
-
 class myexception: public exception
 {
   virtual const char* what() const throw()
@@ -16,9 +15,14 @@ class Matrix{
     private: int cols;
     private: float** matrix;
     private: float D;
-    public: Matrix():matrix(NULL),rows(0),cols(0),D(0){}
+    public: Matrix():matrix(NULL),rows(0),cols(0),D(0){
+                cout.setf(ios::fixed,ios::floatfield);
+                cout.precision(4);
+    }
     public: Matrix(int rows,int cols):rows(rows),cols(cols),D(0){
         try{
+            cout.setf(ios::fixed,ios::floatfield);
+            cout.precision(4);
             matrix =new float*[rows];
             for(int i=0;i<rows;i++){
                 matrix[i]=new float[cols];
@@ -29,6 +33,8 @@ class Matrix{
         }
     }
     public: Matrix(int r, int c,float **matrix):rows(r),cols(c),matrix(matrix){
+        cout.setf(ios::fixed,ios::floatfield);
+        cout.precision(4);
         this->D=Det();
     }
     public: int getRows(){
@@ -124,13 +130,24 @@ class Matrix{
                 if(cols!=that.getRows()){
                     throw myex;
                 }
-                int c;
-                Matrix result=Matrix(rows,that.getCols());
+                float c;
+                Matrix result=Matrix(this->rows,that.getCols());
+                Matrix mat=Matrix(rows,cols);
                 for(int i=0;i<rows;i++){
+                    for(int j=0;j<cols;j++){
+                        mat.setMatrix(i,j,this->getMatrix()[i][j]);
+                    }
+                }
+                int it;
+                int mts;
+                for(int i=0;i<mat.getRows();i++){
                     for(int k=0;k<that.getCols();k++){
                         c=0;
                         for(int j=0;j<that.getCols();j++){
-                            c+=matrix[i][j]*that.getMatrix()[j][k];
+                            c+=mat.getMatrix()[i][j]*that.getMatrix()[j][k];
+                        }
+                        if(abs(c)<(1/float(1000000))){
+                            c=abs(c);
                         }
                         result.setMatrix(i,k,c);
                     }
@@ -271,6 +288,7 @@ int main ()
     //Matrix A=Matrix(3,3,matrix);
     Matrix B=Matrix(3,3);
     B.setMatrix();
+
     cout<<"det="<<B.det()<<endl;
     Matrix C = Matrix(3,3,B.inv().getMatrix());
     Matrix D = Matrix(3,3,(C*B).getMatrix());
