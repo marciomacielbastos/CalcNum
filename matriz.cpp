@@ -81,6 +81,54 @@ class Matrix{
             cerr<<e.what()<<endl;
         }
     }
+    public: Matrix add(Matrix that){
+        try{
+                if(this->cols!=that.getCols()){
+                    throw myex;
+                }
+                int row=rows+that.getRows();
+                Matrix result=Matrix(row,cols);
+                for(int i=0;i<rows;i++){
+                    for(int j=0;j<cols;j++){
+                        result.setMatrix(i,j,this->matrix[i][j]);
+                    }
+                }
+                for(int i=rows;i<row;i++){
+                    for(int j=0;j<cols;j++){
+                        result.setMatrix(i,j,that.getMatrix()[i-rows][j]);
+                    }
+                }
+                return result;
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+
+    }
+    public: Matrix cat(Matrix that){
+        try{
+                if(this->rows!=that.getRows()){
+                    throw myex;
+                }
+                int col=cols+that.getCols();
+                Matrix result=Matrix(rows,col);
+                for(int i=0;i<rows;i++){
+                    for(int j=0;j<cols;j++){
+                        result.setMatrix(i,j,this->matrix[i][j]);
+                    }
+                }
+                for(int i=0;i<rows;i++){
+                    for(int j=cols;j<col;j++){
+                        result.setMatrix(i,j,that.getMatrix()[i][j-cols]);
+                    }
+                }
+                return result;
+        }
+        catch(exception e){
+            cerr<<e.what()<<endl;
+        }
+
+    }
     private: float Det(){
         try{
             float det=1,p;
@@ -348,7 +396,7 @@ int main ()
     Matrix C = Matrix(3,3,B.inv().getMatrix());
     Matrix D = Matrix(3,3,(C*B).getMatrix());
     C=D;
-    C=C*B;
+    C=C.cat(B);
     for(int i=0;i<C.getRows();i++){
         for(int j=0;j<C.getCols();j++){
             cout<<C.getMatrix()[i][j]<<" ";
